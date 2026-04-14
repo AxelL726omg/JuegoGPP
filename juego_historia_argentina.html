@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Historia Industrial Argentina</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0f0e0c;
+  --surface: #1c1a16;
+  --border: #312e26;
+  --accent: #e8a94a;
+  --accent2: #c46f3a;
+  --green: #6fcf97;
+  --red: #eb5757;
+  --text: #f0ead8;
+  --muted: #7a7060;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 48px;
+  background-image:
+    radial-gradient(ellipse at 10% 5%, rgba(232,169,74,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 90%, rgba(196,111,58,0.08) 0%, transparent 50%);
+}
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #f5dfa0 20%, var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+#puntos-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 22px;
+  margin-bottom: 24px;
+}
+
+#puntos-wrap span {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.6); }
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 860px;
+  flex-wrap: wrap;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 220px;
+  max-width: 380px;
+}
+
+.col-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+  padding-left: 4px;
+}
+
+.item {
+  padding: 13px 16px;
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.item.year-chip {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--accent);
+}
+
+.item:hover:not(.correct):not(.wrong) {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(232,169,74,0.18);
+}
+
+.item.selected {
+  border-color: var(--accent);
+  background: rgba(232,169,74,0.12);
+  box-shadow: 0 0 0 3px rgba(232,169,74,0.18);
+}
+
+.item.correct {
+  background: rgba(111,207,151,0.12);
+  border-color: var(--green);
+  color: var(--green);
+  pointer-events: none;
+}
+
+.item.correct.year-chip { color: var(--green); }
+
+.item.wrong {
+  background: rgba(235,87,87,0.12);
+  border-color: var(--red);
+  color: var(--red);
+  pointer-events: none;
+}
+
+.fade-out {
+  opacity: 0;
+  transform: scale(0.9) translateY(-8px);
+  transition: all 0.45s ease;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.fade-in { animation: aparecer 0.35s ease forwards; }
+
+#mensaje {
+  margin-top: 18px;
+  font-size: 0.82rem;
+  color: var(--red);
+  height: 18px;
+}
+
+#delta {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -130%) scale(1.3); }
+}
+
+.show-green { color: var(--green); animation: floatUp 0.9s ease forwards; }
+.show-red   { color: var(--red);   animation: floatUp 0.9s ease forwards; }
+
+@media (max-width: 560px) {
+  .container { flex-direction: column; align-items: center; }
+  .column { max-width: 100%; min-width: unset; width: 100%; }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Historia Industrial Argentina</h1>
+<p class="subtitle">Emparejá el período con su descripción</p>
+
+<div id="puntos-wrap">
+  <div class="dot"></div>
+  <span id="puntos">Puntos: 0</span>
+</div>
+
+<div class="container">
+  <div class="column">
+    <div class="col-label">Período / Año</div>
+    <div id="años"></div>
+  </div>
+  <div class="column">
+    <div class="col-label">Característica principal</div>
+    <div id="descripciones"></div>
+  </div>
+</div>
+
+<div id="mensaje"></div>
+<div id="delta"></div>
+
+<script>
+const todosLosPares = [
+  {
+    año: "1880",
+    titulo: "Modelo Agroexportador",
+    descripcion: "Argentina exporta carne y cereales; llegan inmigrantes europeos y el capital británico domina la economía."
+  },
+  {
+    año: "1914–1930",
+    titulo: "Crisis del Modelo Agroexportador",
+    descripcion: "La Primera Guerra Mundial frena las importaciones y surgen las primeras industrias textiles y metalúrgicas locales."
+  },
+  {
+    año: "1930",
+    titulo: "Inicio de la ISI",
+    descripcion: "Golpe de Estado y crisis mundial impulsan a Argentina a producir lo que antes importaba, con mayor intervención estatal."
+  },
+  {
+    año: "1946–1955",
+    titulo: "Industrialización y Estado fuerte",
+    descripcion: "Gobierno de Perón: empresas estatales, siderurgia, automotriz y fomento del mercado interno y los derechos laborales."
+  },
+  {
+    año: "1955–1976",
+    titulo: "Capital extranjero e industria pesada",
+    descripcion: "Arriban multinacionales automotrices; la industria pesada crece en Córdoba y Buenos Aires."
+  },
+  {
+    año: "1976–1983",
+    titulo: "Dictadura y apertura económica",
+    descripcion: "La dictadura militar abre las importaciones, reduce el rol del Estado y provoca una desindustrialización acelerada."
+  },
+  {
+    año: "1990–2001",
+    titulo: "Reformas neoliberales",
+    descripcion: "Menem privatiza empresas públicas, establece la convertibilidad peso-dólar y abre el comercio, cerrando industrias locales."
+  },
+  {
+    año: "2001",
+    titulo: "Crisis económica",
+    descripcion: "Colapso financiero y político: cae el empleo, la producción y el sistema bancario; fin de la convertibilidad."
+  },
+  {
+    año: "2003–2015",
+    titulo: "Recuperación industrial",
+    descripcion: "Políticas de impulso a la industria nacional; crecen el empleo, el consumo y sectores como automotriz y alimentos."
+  },
+  {
+    año: "2016–Hoy",
+    titulo: "Actualidad",
+    descripcion: "Argentina diversifica su producción: agroindustria, energía, economía del conocimiento y litio ganan protagonismo."
+  }
+];
+
+let añosActivos = [];
+let descripcionesActivas = [];
+let seleccion1 = null;
+let seleccion2 = null;
+let puntos = 0;
+let tiempoInicio = Date.now();
+
+const contAños = document.getElementById("años");
+const contDesc = document.getElementById("descripciones");
+const mensaje = document.getElementById("mensaje");
+const puntosUI = document.getElementById("puntos");
+const delta = document.getElementById("delta");
+
+/* VOZ */
+let vocesDisponibles = [];
+speechSynthesis.onvoiceschanged = () => { vocesDisponibles = speechSynthesis.getVoices(); };
+
+function hablar(texto) {
+  speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(texto);
+  const voz = vocesDisponibles.find(v => v.lang.includes("es") && v.name.toLowerCase().includes("google"))
+            || vocesDisponibles.find(v => v.lang.includes("es"));
+  if (voz) msg.voice = voz;
+  speechSynthesis.speak(msg);
+}
+
+function actualizarPuntos() { puntosUI.textContent = "Puntos: " + puntos; }
+function mezclar(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function mostrarDelta(texto, esPositivo) {
+  delta.textContent = texto;
+  delta.className = "";
+  void delta.offsetWidth;
+  delta.className = esPositivo ? "show-green" : "show-red";
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function iniciarJuego() {
+  const seleccion = mezclar(todosLosPares).slice(0, 5);
+  añosActivos = [...seleccion];
+
+  const correctos = seleccion.slice(0, 2);
+  descripcionesActivas = [...correctos];
+
+  let intentos = 0;
+  while (descripcionesActivas.length < 5 && intentos < 200) {
+    intentos++;
+    const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
+    if (!descripcionesActivas.some(d => d.descripcion === random.descripcion)) {
+      descripcionesActivas.push(random);
+    }
+  }
+
+  render();
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  contAños.innerHTML = "";
+  contDesc.innerHTML = "";
+
+  añosActivos.forEach(p => {
+    const el = crearItemAño(p);
+    el.classList.add("fade-in");
+    contAños.appendChild(el);
+  });
+
+  mezclar(descripcionesActivas).forEach(p => {
+    const el = crearItemDesc(p);
+    el.classList.add("fade-in");
+    contDesc.appendChild(el);
+  });
+}
+
+function crearItemAño(par) {
+  const div = document.createElement("div");
+  div.classList.add("item", "year-chip");
+  div.dataset.tipo = "año";
+  div.dataset.valor = par.año;
+
+  div.innerHTML = `<div>${par.año}</div><div style="font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:400;color:var(--muted);margin-top:3px;">${par.titulo}</div>`;
+  div.addEventListener("click", () => manejarSeleccion(div));
+  return div;
+}
+
+function crearItemDesc(par) {
+  const div = document.createElement("div");
+  div.classList.add("item");
+  div.dataset.tipo = "descripcion";
+  div.dataset.valor = par.descripcion;
+  div.textContent = par.descripcion;
+  div.addEventListener("click", () => manejarSeleccion(div));
+  return div;
+}
+
+// ─── SELECCIÓN ───────────────────────────────────────────────────────────────
+function manejarSeleccion(item) {
+  mensaje.textContent = "";
+
+  if (!seleccion1) {
+    seleccion1 = item;
+    item.classList.add("selected");
+    hablar(item.dataset.valor);
+    return;
+  }
+
+  if (!seleccion2 && item !== seleccion1) {
+    seleccion2 = item;
+    item.classList.add("selected");
+    hablar(item.dataset.valor);
+    verificar();
+  }
+}
+
+function verificar() {
+  if (seleccion1.dataset.tipo === seleccion2.dataset.tipo) {
+    mensaje.textContent = "Elegí un período con una descripción";
+    resetSeleccion();
+    return;
+  }
+
+  const año = seleccion1.dataset.tipo === "año" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const desc = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const correcto = todosLosPares.find(p => p.año === año && p.descripcion === desc);
+
+  if (correcto) {
+    const tiempo = (Date.now() - tiempoInicio) / 1000;
+    const bonus = Math.max(0, 200 - tiempo * 10);
+    const ganado = Math.floor(100 + bonus);
+    puntos += ganado;
+    actualizarPuntos();
+    mostrarDelta("+" + ganado, true);
+
+    seleccion1.classList.remove("selected");
+    seleccion2.classList.remove("selected");
+    seleccion1.classList.add("correct");
+    seleccion2.classList.add("correct");
+
+    setTimeout(() => {
+      seleccion1.classList.add("fade-out");
+      seleccion2.classList.add("fade-out");
+    }, 900);
+
+    setTimeout(() => {
+      reemplazarPar(año, desc);
+      tiempoInicio = Date.now();
+    }, 1800);
+
+  } else {
+    puntos -= 50;
+    actualizarPuntos();
+    mostrarDelta("-50", false);
+
+    seleccion1.classList.remove("selected");
+    seleccion2.classList.remove("selected");
+    seleccion1.classList.add("wrong");
+    seleccion2.classList.add("wrong");
+
+    setTimeout(resetSeleccion, 700);
+  }
+}
+
+// ─── REEMPLAZO (sin duplicados) ───────────────────────────────────────────────
+function reemplazarPar(añoTexto, descTexto) {
+  const itemsAños = Array.from(contAños.children);
+  const itemsDesc = Array.from(contDesc.children);
+
+  const indexAño = itemsAños.findIndex(i => i.dataset.valor === añoTexto);
+  const indexDesc = itemsDesc.findIndex(i => i.dataset.valor === descTexto);
+
+  // Quitamos el par acertado de los activos
+  añosActivos = añosActivos.filter(p => p.año !== añoTexto);
+  descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descTexto);
+
+  // Elegimos un año nuevo que no esté ya visible
+  const disponibles = todosLosPares.filter(p =>
+    !añosActivos.some(n => n.año === p.año)
+  );
+
+  if (disponibles.length === 0) {
+    resetSeleccion();
+    return;
+  }
+
+  const nuevoAño = disponibles[Math.floor(Math.random() * disponibles.length)];
+  añosActivos.push(nuevoAño);
+
+  // Determinamos cuáles años ya tienen su descripción visible
+  const añosConPar = añosActivos.filter(n =>
+    descripcionesActivas.some(d => {
+      const par = todosLosPares.find(p => p.año === n.año);
+      return par && par.descripcion === d.descripcion;
+    })
+  );
+  const añosSinPar = añosActivos.filter(n =>
+    !añosConPar.some(c => c.año === n.año)
+  );
+  const añosViejos = añosSinPar.filter(n => n.año !== nuevoAño.año);
+
+  let elegido;
+  if (Math.random() < 0.8 && añosViejos.length > 0) {
+    elegido = añosViejos[Math.floor(Math.random() * añosViejos.length)];
+  } else {
+    elegido = nuevoAño;
+  }
+
+  // ✅ Descripción sin duplicados
+  let nuevaDesc = todosLosPares.find(p => p.año === elegido.año);
+
+  if (descripcionesActivas.some(d => d.descripcion === nuevaDesc.descripcion)) {
+    const alternativa = todosLosPares.find(p =>
+      !descripcionesActivas.some(d => d.descripcion === p.descripcion)
+    );
+    if (alternativa) nuevaDesc = alternativa;
+  }
+
+  descripcionesActivas.push(nuevaDesc);
+
+  // Crear y reemplazar en el DOM
+  const nuevoAñoDiv = crearItemAño(nuevoAño);
+  const nuevaDescDiv = crearItemDesc(nuevaDesc);
+
+  nuevoAñoDiv.classList.add("fade-in");
+  nuevaDescDiv.classList.add("fade-in");
+
+  contAños.replaceChild(nuevoAñoDiv, itemsAños[indexAño]);
+  contDesc.replaceChild(nuevaDescDiv, itemsDesc[indexDesc]);
+
+  resetSeleccion();
+}
+
+function resetSeleccion() {
+  document.querySelectorAll(".item").forEach(i => {
+    i.classList.remove("selected", "wrong", "correct", "fade-out");
+  });
+  seleccion1 = null;
+  seleccion2 = null;
+}
+
+iniciarJuego();
+</script>
+
+</body>
+</html>
