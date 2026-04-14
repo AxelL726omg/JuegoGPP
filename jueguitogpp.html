@@ -5,40 +5,127 @@
 <title>Juego Emparejar PRO</title>
 
 <style>
-body { font-family: Arial; text-align: center; background: #f5f5f5; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #e3f2fd, #f5f5f5);
+  margin: 0;
+}
 
+h1 {
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+#puntos {
+  font-size: 22px;
+  margin: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* contenedor */
 .container {
   display: flex;
   justify-content: center;
-  gap: 50px;
-  margin-top: 20px;
+  gap: 30px;
+  margin: 20px;
+  flex-wrap: wrap;
 }
 
+/* columnas */
 .column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.item {
-  padding: 10px;
-  border: 2px solid #333;
+  gap: 12px;
+  padding: 15px;
   background: white;
-  cursor: pointer;
-  transition: 0.3s;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  min-width: 250px;
+  max-width: 320px;
+  width: 100%;
 }
 
-.selected { background: #ddd; }
-.correct { background: #4CAF50; color: white; }
-.wrong { background: #f44336; color: white; }
+/* tarjetas */
+.item {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid #ddd;
+  opacity: 1;
+}
 
+/* hover */
+.item:hover {
+  transform: translateY(-2px);
+  background: #f0f8ff;
+}
+
+/* seleccionado */
+.selected {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+/* correcto */
+.correct {
+  background: #22c55e;
+  color: white;
+  border: none;
+}
+
+/* incorrecto */
+.wrong {
+  background: #ef4444;
+  color: white;
+  border: none;
+}
+
+/* fade out */
 .fade-out {
   opacity: 0;
-  transition: opacity 0.5s;
+  transform: scale(0.95);
+  transition: all 0.5s;
 }
 
-#mensaje { color: red; margin-top: 10px; }
-#puntos { font-size: 20px; margin-top: 10px; }
+/* fade in */
+.fade-in {
+  opacity: 0;
+  transform: scale(0.95);
+  animation: aparecer 0.4s forwards;
+}
+
+@keyframes aparecer {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#mensaje {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #ef4444;
+}
+
+/* 📱 MOBILE */
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .column {
+    max-width: 90%;
+  }
+
+  .item {
+    font-size: 14px;
+  }
+}
 </style>
 </head>
 
@@ -86,7 +173,7 @@ const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 
-// 🔊 VOZ MEJORADA
+/* 🔊 VOZ MEJORADA */
 let vocesDisponibles = [];
 
 speechSynthesis.onvoiceschanged = () => {
@@ -98,7 +185,6 @@ function hablar(texto) {
 
   const msg = new SpeechSynthesisUtterance(texto);
 
-  // buscar mejor voz en español
   let voz = vocesDisponibles.find(v => 
     v.lang.includes("es") && v.name.toLowerCase().includes("google")
   );
@@ -108,9 +194,6 @@ function hablar(texto) {
   }
 
   if (voz) msg.voice = voz;
-
-  msg.rate = 1;
-  msg.pitch = 1;
 
   speechSynthesis.speak(msg);
 }
@@ -147,11 +230,15 @@ function render() {
   contDesc.innerHTML = "";
 
   nombresActivos.forEach(p => {
-    contNombres.appendChild(crearItem(p.nombre, "nombre"));
+    const el = crearItem(p.nombre, "nombre");
+    el.classList.add("fade-in");
+    contNombres.appendChild(el);
   });
 
   mezclar(descripcionesActivas).forEach(p => {
-    contDesc.appendChild(crearItem(p.descripcion, "descripcion"));
+    const el = crearItem(p.descripcion, "descripcion");
+    el.classList.add("fade-in");
+    contDesc.appendChild(el);
   });
 }
 
@@ -255,6 +342,9 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
 
   const nuevoNombreDiv = crearItem(nuevoNombre.nombre, "nombre");
   const nuevaDescDiv = crearItem(nuevaDesc.descripcion, "descripcion");
+
+  nuevoNombreDiv.classList.add("fade-in");
+  nuevaDescDiv.classList.add("fade-in");
 
   contNombres.replaceChild(nuevoNombreDiv, itemsNombres[indexNombre]);
   contDesc.replaceChild(nuevaDescDiv, itemsDesc[indexDesc]);
