@@ -2,29 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Juego de Emparejar PRO</title>
+<title>Juego Emparejar PRO FIX</title>
 
 <style>
-body {
-  font-family: Arial;
-  text-align: center;
-  background: #f5f5f5;
-}
-
-h1 { margin-top: 15px; }
-
-.container {
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-  margin-top: 20px;
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+body { font-family: Arial; text-align: center; background: #f5f5f5; }
+.container { display: flex; justify-content: center; gap: 50px; margin-top: 20px; }
+.column { display: flex; flex-direction: column; gap: 10px; }
 
 .item {
   padding: 10px;
@@ -37,9 +20,8 @@ h1 { margin-top: 15px; }
 .selected { background: #ddd; }
 .correct { background: #4CAF50; color: white; }
 .wrong { background: #f44336; color: white; }
-.hidden { opacity: 0; transition: opacity 0.3s; }
 
-#mensaje { margin-top: 10px; color: red; }
+#mensaje { color: red; margin-top: 10px; }
 #puntos { font-size: 20px; margin-top: 10px; }
 </style>
 </head>
@@ -92,18 +74,29 @@ function actualizarPuntos() {
   puntosUI.textContent = "Puntos: " + puntos;
 }
 
-function iniciarJuego() {
-  const copia = [...todosLosPares].sort(() => Math.random() - 0.5);
-  nombresActivos = copia.slice(0, 5);
+function mezclar(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
 
-  const correctos = nombresActivos.slice(0, 2);
+// 🧠 INICIO SEGURO
+function iniciarJuego() {
+  const seleccion = mezclar(todosLosPares).slice(0, 5);
+  nombresActivos = [...seleccion];
+
+  const correctos = seleccion.slice(0, 2);
+
   descripcionesActivas = [];
 
+  // meter correctas
   correctos.forEach(p => descripcionesActivas.push(p));
 
+  // rellenar sin duplicar
   while (descripcionesActivas.length < 5) {
     const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
-    descripcionesActivas.push(random);
+
+    if (!descripcionesActivas.find(d => d.descripcion === random.descripcion)) {
+      descripcionesActivas.push(random);
+    }
   }
 
   render();
@@ -117,11 +110,9 @@ function render() {
     contNombres.appendChild(crearItem(p.nombre, "nombre"));
   });
 
-  descripcionesActivas
-    .sort(() => Math.random() - 0.5)
-    .forEach(p => {
-      contDesc.appendChild(crearItem(p.descripcion, "descripcion"));
-    });
+  mezclar(descripcionesActivas).forEach(p => {
+    contDesc.appendChild(crearItem(p.descripcion, "descripcion"));
+  });
 }
 
 function crearItem(texto, tipo) {
@@ -151,41 +142,26 @@ function manejarSeleccion(item) {
 }
 
 function verificar() {
-  const tipo1 = seleccion1.dataset.tipo;
-  const tipo2 = seleccion2.dataset.tipo;
-
-  if (tipo1 === tipo2) {
+  if (seleccion1.dataset.tipo === seleccion2.dataset.tipo) {
     mensaje.textContent = "Elegí un nombre con una descripción";
     resetSeleccion();
     return;
   }
 
-  let nombre, descripcion;
-
-  if (tipo1 === "nombre") {
-    nombre = seleccion1.dataset.valor;
-    descripcion = seleccion2.dataset.valor;
-  } else {
-    nombre = seleccion2.dataset.valor;
-    descripcion = seleccion1.dataset.valor;
-  }
+  let nombre = seleccion1.dataset.tipo === "nombre" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  let descripcion = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
 
   const correcto = todosLosPares.find(p => p.nombre === nombre && p.descripcion === descripcion);
 
   if (correcto) {
     const tiempo = (Date.now() - tiempoInicio) / 1000;
-    let bonus = Math.max(0, 200 - tiempo * 10);
+    const bonus = Math.max(0, 200 - tiempo * 10);
     puntos += Math.floor(100 + bonus);
     actualizarPuntos();
 
-    seleccion1.classList.add("correct");
-    seleccion2.classList.add("correct");
+    reemplazarPar(nombre, descripcion);
 
-    setTimeout(() => {
-      reemplazarPar(nombre, descripcion);
-      resetSeleccion();
-      tiempoInicio = Date.now();
-    }, 300);
+    tiempoInicio = Date.now();
 
   } else {
     puntos -= 50;
@@ -194,14 +170,17 @@ function verificar() {
     seleccion1.classList.add("wrong");
     seleccion2.classList.add("wrong");
 
-    setTimeout(() => resetSeleccion(), 700);
+    setTimeout(resetSeleccion, 700);
   }
 }
 
 function reemplazarPar(nombreTexto, descripcionTexto) {
+
+  // eliminar
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
+  // agregar nombre nuevo (sin repetir)
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.find(n => n.nombre === p.nombre)
   );
@@ -209,12 +188,25 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  const posibles = nombresActivos;
-  const nuevaDesc = posibles[Math.floor(Math.random() * posibles.length)];
+  // descripción basada en nombres activos (garantiza match)
+  const posibles = nombresActivos.map(n =>
+    todosLosPares.find(p => p.nombre === n.nombre)
+  );
+
+  let nuevaDesc;
+
+  do {
+    nuevaDesc = posibles[Math.floor(Math.random() * posibles.length)];
+  } while (descripcionesActivas.find(d => d.descripcion === nuevaDesc.descripcion));
 
   descripcionesActivas.push(nuevaDesc);
 
+  // 🔒 SEGURIDAD: mantener 5 y 5
+  if (nombresActivos.length > 5) nombresActivos.pop();
+  if (descripcionesActivas.length > 5) descripcionesActivas.pop();
+
   render();
+  resetSeleccion();
 }
 
 function resetSeleccion() {
