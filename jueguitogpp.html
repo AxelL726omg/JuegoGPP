@@ -241,6 +241,178 @@ h1 {
 <div id="delta"></div>
 
 <script>
+const todosLosPares = [
+  { nombre: "Platón", descripcion: "Primera mención de la división del trabajo" },
+  { nombre: "Adam Smith", descripcion: "División del trabajo" },
+  { nombre: "Charles Babbage", descripcion: "Organización y economía de la producción" },
+  { nombre: "William Crozier", descripcion: "Enfoque de planificación" },
+  { nombre: "Elton Mayo y Hawthorne", descripcion: "Importancia del trabajo" },
+  { nombre: "L. H. C. Tippett", descripcion: "Muestreo del trabajo" },
+  { nombre: "Eli Whitney", descripcion: "Piezas intercambiables y producción en serie" },
+  { nombre: "F. W. Harris", descripcion: "Administración de inventarios" },
+  { nombre: "W. Shewhart", descripcion: "Control de calidad estadístico" },
+  { nombre: "Walter Rathenau", descripcion: "Técnicas de administración" },
+  { nombre: "Henry Gantt", descripcion: "Planificación y control de la producción" },
+  { nombre: "Henri Fayol", descripcion: "Enfoque general de la administración" },
+  { nombre: "Frank y Lillian Gilbreth", descripcion: "Economía del movimiento" },
+  { nombre: "Frederick Taylor", descripcion: "Estudio del tiempo y movimiento" },
+  { nombre: "George Dantzig", descripcion: "Programación lineal" },
+  { nombre: "Henry Ford", descripcion: "Línea de producción o cadena" }
+];
+
+let nombresActivos = [];
+let descripcionesActivas = [];
+let seleccion1 = null;
+let seleccion2 = null;
+let puntos = 0;
+let tiempoInicio = Date.now();
+
+const contNombres = document.getElementById("nombres");
+const contDesc = document.getElementById("descripciones");
+const mensaje = document.getElementById("mensaje");
+const puntosUI = document.getElementById("puntos");
+const delta = document.getElementById("delta");
+
+/* VOZ */
+let vocesDisponibles = [];
+speechSynthesis.onvoiceschanged = () => { vocesDisponibles = speechSynthesis.getVoices(); };
+
+function hablar(texto) {
+  speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(texto);
+  let voz = vocesDisponibles.find(v => v.lang.includes("es") && v.name.toLowerCase().includes("google"))
+    || vocesDisponibles.find(v => v.lang.includes("es"));
+  if (voz) msg.voice = voz;
+  speechSynthesis.speak(msg);
+}
+
+function actualizarPuntos() { puntosUI.textContent = "Puntos: " + puntos; }
+
+function mezclar(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function mostrarDelta(texto, esPositivo) {
+  delta.textContent = texto;
+  delta.className = esPositivo ? "show-green" : "show-red";
+  void delta.offsetWidth; // reflow para reiniciar animación
+  delta.className = esPositivo ? "show-green" : "show-red";
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function iniciarJuego() {
+  const seleccion = mezclar(todosLosPares).slice(0, 5);
+  nombresActivos = [...seleccion];
+
+  // Al inicio garantizamos al menos 2 pares correctos visibles
+  const correctos = seleccion.slice(0, 2);
+  descripcionesActivas = [...correctos];
+
+  while (descripcionesActivas.length < 5) {
+    const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
+    // ✅ FIX: verificar que descripción no esté duplicada
+    if (!descripcionesActivas.some(d => d.descripcion === random.descripcion)) {
+      descripcionesActivas.push(random);
+    }
+  }
+
+  render();
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  contNombres.innerHTML = "";
+  contDesc.innerHTML = "";
+
+  nombresActivos.forEach(p => {
+    const el = crearItem(p.nombre, "nombre");
+    el.classList.add("fade-in");
+    contNombres.appendChild(el);
+  });
+
+  mezclar(descripcionesActivas).forEach(p => {
+    const el = crearItem(p.descripcion, "descripcion");
+    el.classList.add("fade-in");
+    contDesc.appendChild(el);
+  });
+}
+
+function crearItem(texto, tipo) {
+  const div = document.createElement("div");
+  div.textContent = texto;
+  div.classList.add("item");
+  div.dataset.tipo = tipo;
+  div.dataset.valor = texto;
+  div.addEventListener("click", () => manejarSeleccion(div));
+  return div;
+}
+
+// ─── SELECCIÓN ───────────────────────────────────────────────────────────────
+function manejarSeleccion(item) {
+  mensaje.textContent = "";
+
+  if (!seleccion1) {
+    seleccion1 = item;
+    item.classList.add("selected");
+    hablar(item.textContent);
+    return;
+  }
+
+  if (!seleccion2 && item !== seleccion1) {
+    seleccion2 = item;
+    item.classList.add("selected");
+    hablar(item.textContent);
+    verificar();
+  }
+}
+
+function verificar() {
+  if (seleccion1.dataset.tipo === seleccion2.dataset.tipo) {
+    mensaje.textContent = "Elegí un nombre con una descripción";
+    resetSeleccion();
+    return;
+  }
+
+  const nombre = seleccion1.dataset.tipo === "nombre" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const descripcion = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const correcto = todosLosPares.find(p => p.nombre === nombre && p.descripcion === descripcion);
+
+  if (correcto) {
+    const tiempo = (Date.now() - tiempoInicio) / 1000;
+    const bonus = Math.max(0, 200 - tiempo * 10);
+    const ganado = Math.floor(100 + bonus);
+    puntos += ganado;
+    actualizarPuntos();
+    mostrarDelta("+" + ganado, true);
+
+    seleccion1.classList.remove("selected");
+    seleccion2.classList.remove("selected");
+    seleccion1.classList.add("correct");
+    seleccion2.classList.add("correct");
+
+    setTimeout(() => {
+      seleccion1.classList.add("fade-out");
+      seleccion2.classList.add("fade-out");
+    }, 900);
+
+    setTimeout(() => {
+      reemplazarPar(nombre, descripcion);
+      tiempoInicio = Date.now();
+    }, 1800);
+
+  } else {
+    puntos -= 50;
+    actualizarPuntos();
+    mostrarDelta("-50", false);
+
+    seleccion1.classList.remove("selected");
+    seleccion2.classList.remove("selected");
+    seleccion1.classList.add("wrong");
+    seleccion2.classList.add("wrong");
+
+    setTimeout(resetSeleccion, 700);
+  }
+}
+
+// ─── REEMPLAZO (con fix duplicados) ──────────────────────────────────────────
 function reemplazarPar(nombreTexto, descripcionTexto) {
   const itemsNombres = Array.from(contNombres.children);
   const itemsDesc = Array.from(contDesc.children);
@@ -248,59 +420,54 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const indexNombre = itemsNombres.findIndex(i => i.textContent === nombreTexto);
   const indexDesc = itemsDesc.findIndex(i => i.textContent === descripcionTexto);
 
-  // Quitamos el par acertado
+  // Quitamos el par acertado de los activos
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
-  // Nuevo nombre que entra
+  // Elegimos un nombre nuevo (que no esté ya visible)
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.some(n => n.nombre === p.nombre)
   );
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  // ───── NUEVA LÓGICA INTELIGENTE ─────
-
-  // Detectar cuáles ya tienen su par correcto
-  const nombresConPar = nombresActivos.filter(n => {
-    const par = todosLosPares.find(p => p.nombre === n.nombre);
-    return descripcionesActivas.some(d => d.descripcion === par.descripcion);
-  });
-
-  // Nombres sin par (los importantes)
+  // Decidimos qué descripción agregar (con 80% de prob. la del nuevo nombre,
+  // o la de uno que ya estaba sin par)
+  const nombresConPar = nombresActivos.filter(n =>
+    descripcionesActivas.some(d => {
+      const par = todosLosPares.find(p => p.nombre === n.nombre);
+      return par && par.descripcion === d.descripcion;
+    })
+  );
   const nombresSinPar = nombresActivos.filter(n =>
     !nombresConPar.some(c => c.nombre === n.nombre)
   );
-
-  // Sacamos el nuevo para priorizar los viejos
-  const candidatos = nombresSinPar.filter(n => n.nombre !== nuevoNombre.nombre);
+  const nombresViejos = nombresSinPar.filter(n => n.nombre !== nuevoNombre.nombre);
 
   let elegidoNombre;
-
-  // 85% prioriza nombres ya visibles SIN par
-  if (candidatos.length > 0 && Math.random() < 0.85) {
-    elegidoNombre = candidatos[Math.floor(Math.random() * candidatos.length)];
+  if (Math.random() < 0.8 && nombresViejos.length > 0) {
+    elegidoNombre = nombresViejos[Math.floor(Math.random() * nombresViejos.length)];
   } else {
     elegidoNombre = nuevoNombre;
   }
 
-  // Obtener su descripción correcta
+  // ✅ FIX PRINCIPAL: la descripción elegida NO debe estar ya en descripcionesActivas
   let nuevaDesc = todosLosPares.find(p => p.nombre === elegidoNombre.nombre);
 
-  // Evitar duplicados SIEMPRE
   if (descripcionesActivas.some(d => d.descripcion === nuevaDesc.descripcion)) {
-    const alternativas = todosLosPares.filter(p =>
+    // Buscar descripción alternativa que no esté activa
+    const alternativa = todosLosPares.find(p =>
       !descripcionesActivas.some(d => d.descripcion === p.descripcion)
     );
-
-    if (alternativas.length > 0) {
-      nuevaDesc = alternativas[Math.floor(Math.random() * alternativas.length)];
+    if (alternativa) {
+      nuevaDesc = alternativa;
     }
+    // Si no hay alternativa (caso casi imposible con 16 pares y 5 activos), usamos la original
   }
 
   descripcionesActivas.push(nuevaDesc);
 
-  // ───── DOM ─────
+  // Crear y reemplazar elementos en el DOM
   const nuevoNombreDiv = crearItem(nuevoNombre.nombre, "nombre");
   const nuevaDescDiv = crearItem(nuevaDesc.descripcion, "descripcion");
 
@@ -312,6 +479,16 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
 
   resetSeleccion();
 }
+
+function resetSeleccion() {
+  document.querySelectorAll(".item").forEach(i => {
+    i.classList.remove("selected", "wrong", "correct", "fade-out");
+  });
+  seleccion1 = null;
+  seleccion2 = null;
+}
+
+iniciarJuego();
 </script>
 
 </body>
