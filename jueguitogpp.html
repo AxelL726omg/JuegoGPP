@@ -86,6 +86,14 @@ const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 
+function hablar(texto) {
+  speechSynthesis.cancel(); // cortar lo anterior
+  const msg = new SpeechSynthesisUtterance(texto);
+  msg.lang = "es-ES";
+  msg.rate = 1;
+  speechSynthesis.speak(msg);
+}
+
 function actualizarPuntos() {
   puntosUI.textContent = "Puntos: " + puntos;
 }
@@ -142,12 +150,18 @@ function manejarSeleccion(item) {
   if (!seleccion1) {
     seleccion1 = item;
     item.classList.add("selected");
+
+    hablar(item.textContent);
+
     return;
   }
 
   if (!seleccion2 && item !== seleccion1) {
     seleccion2 = item;
     item.classList.add("selected");
+
+    hablar(item.textContent);
+
     verificar();
   }
 }
@@ -173,13 +187,11 @@ function verificar() {
     seleccion1.classList.add("correct");
     seleccion2.classList.add("correct");
 
-    // fade después de 1 segundo
     setTimeout(() => {
       seleccion1.classList.add("fade-out");
       seleccion2.classList.add("fade-out");
     }, 1000);
 
-    // reemplazo después de 2 segundos
     setTimeout(() => {
       reemplazarPar(nombre, descripcion);
       tiempoInicio = Date.now();
@@ -197,7 +209,6 @@ function verificar() {
 }
 
 function reemplazarPar(nombreTexto, descripcionTexto) {
-
   const itemsNombres = Array.from(contNombres.children);
   const itemsDesc = Array.from(contDesc.children);
 
