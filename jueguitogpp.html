@@ -279,7 +279,7 @@ function verificar() {
   }
 }
 
-/* 🔥 ARREGLADO */
+/* 🔥 LÓGICA FINAL PERFECTA */
 function reemplazarPar(nombreTexto, descripcionTexto) {
   const itemsNombres = Array.from(contNombres.children);
   const itemsDesc = Array.from(contDesc.children);
@@ -297,9 +297,9 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  // 🔥 detectar incorrectas correctamente
-  const descripcionesIncorrectas = descripcionesActivas.filter(d => {
-    return !nombresActivos.some(n => {
+  // detectar nombres con par correcto
+  const nombresConParCorrecto = nombresActivos.filter(n => {
+    return descripcionesActivas.some(d => {
       const par = todosLosPares.find(p => p.nombre === n.nombre);
       return par && par.descripcion === d.descripcion;
     });
@@ -309,30 +309,34 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const probNuevaCorrecta = 0.2;
 
   if (Math.random() < probNuevaCorrecta) {
-    nuevaDesc = todosLosPares.find(p => p.nombre === nuevoNombre.nombre);
+    const posible = todosLosPares.find(p => p.nombre === nuevoNombre.nombre);
 
-    if (descripcionesActivas.find(d => d.descripcion === nuevaDesc.descripcion)) {
-      nuevaDesc = null;
+    if (
+      !descripcionesActivas.some(d => d.descripcion === posible.descripcion) &&
+      !nombresConParCorrecto.some(n => n.nombre === nuevoNombre.nombre)
+    ) {
+      nuevaDesc = posible;
     }
   }
 
   if (!nuevaDesc) {
-    if (descripcionesIncorrectas.length > 0) {
-      nuevaDesc = descripcionesIncorrectas[
-        Math.floor(Math.random() * descripcionesIncorrectas.length)
-      ];
-    } else {
-      const fallback = todosLosPares.filter(p =>
-        !descripcionesActivas.find(d => d.descripcion === p.descripcion)
-      );
-      nuevaDesc = fallback[Math.floor(Math.random() * fallback.length)];
+    const pool = todosLosPares.filter(p =>
+      !descripcionesActivas.some(d => d.descripcion === p.descripcion) &&
+      !nombresConParCorrecto.some(n => n.nombre === p.nombre) &&
+      p.nombre !== nuevoNombre.nombre
+    );
+
+    if (pool.length > 0) {
+      nuevaDesc = pool[Math.floor(Math.random() * pool.length)];
     }
   }
 
-  // 🛑 protección
   if (!nuevaDesc) {
-    console.error("Error: nuevaDesc undefined");
-    return;
+    const fallback = todosLosPares.filter(p =>
+      !descripcionesActivas.some(d => d.descripcion === p.descripcion)
+    );
+
+    nuevaDesc = fallback[Math.floor(Math.random() * fallback.length)];
   }
 
   descripcionesActivas.push(nuevaDesc);
