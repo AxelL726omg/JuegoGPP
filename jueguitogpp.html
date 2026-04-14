@@ -86,11 +86,32 @@ const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 
+// 🔊 VOZ MEJORADA
+let vocesDisponibles = [];
+
+speechSynthesis.onvoiceschanged = () => {
+  vocesDisponibles = speechSynthesis.getVoices();
+};
+
 function hablar(texto) {
-  speechSynthesis.cancel(); // cortar lo anterior
+  speechSynthesis.cancel();
+
   const msg = new SpeechSynthesisUtterance(texto);
-  msg.lang = "es-ES";
+
+  // buscar mejor voz en español
+  let voz = vocesDisponibles.find(v => 
+    v.lang.includes("es") && v.name.toLowerCase().includes("google")
+  );
+
+  if (!voz) {
+    voz = vocesDisponibles.find(v => v.lang.includes("es"));
+  }
+
+  if (voz) msg.voice = voz;
+
   msg.rate = 1;
+  msg.pitch = 1;
+
   speechSynthesis.speak(msg);
 }
 
@@ -150,18 +171,14 @@ function manejarSeleccion(item) {
   if (!seleccion1) {
     seleccion1 = item;
     item.classList.add("selected");
-
     hablar(item.textContent);
-
     return;
   }
 
   if (!seleccion2 && item !== seleccion1) {
     seleccion2 = item;
     item.classList.add("selected");
-
     hablar(item.textContent);
-
     verificar();
   }
 }
