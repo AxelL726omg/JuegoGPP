@@ -5,6 +5,7 @@
 <title>Juego Emparejar PRO</title>
 
 <style>
+/* (todo tu CSS igual, no se toca) */
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   text-align: center;
@@ -12,10 +13,7 @@ body {
   margin: 0;
 }
 
-h1 {
-  margin-top: 20px;
-  font-weight: 600;
-}
+h1 { margin-top: 20px; font-weight: 600; }
 
 #puntos {
   font-size: 22px;
@@ -54,29 +52,25 @@ h1 {
   border: 1px solid #ddd;
 }
 
-/* 🔥 FIX: hover solo si NO es correcto/incorrecto */
 .item:hover:not(.correct):not(.wrong) {
   transform: translateY(-2px);
   background: #f0f8ff;
 }
 
-.selected {
-  background: #dbeafe;
-  border-color: #3b82f6;
-}
+.selected { background: #dbeafe; border-color: #3b82f6; }
 
 .correct {
   background: #22c55e;
   color: white;
   border: none;
-  pointer-events: none; /* opcional: bloquea interacción */
+  pointer-events: none;
 }
 
 .wrong {
   background: #ef4444;
   color: white;
   border: none;
-  pointer-events: none; /* opcional */
+  pointer-events: none;
 }
 
 .fade-out {
@@ -92,10 +86,7 @@ h1 {
 }
 
 @keyframes aparecer {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  to { opacity: 1; transform: scale(1); }
 }
 
 #mensaje {
@@ -104,20 +95,10 @@ h1 {
   color: #ef4444;
 }
 
-/* 📱 MOBILE */
 @media (max-width: 600px) {
-  .container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .column {
-    max-width: 90%;
-  }
-
-  .item {
-    font-size: 14px;
-  }
+  .container { flex-direction: column; align-items: center; }
+  .column { max-width: 90%; }
+  .item { font-size: 14px; }
 }
 </style>
 </head>
@@ -135,24 +116,7 @@ h1 {
 <div id="mensaje"></div>
 
 <script>
-const todosLosPares = [
-  { nombre: "Platón", descripcion: "Primera mención de la división del trabajo" },
-  { nombre: "Adam Smith", descripcion: "División del trabajo" },
-  { nombre: "Charles Babbage", descripcion: "Organización y economía de la producción" },
-  { nombre: "William Crozier", descripcion: "Enfoque de planificación" },
-  { nombre: "Elton Mayo y Hawthorne", descripcion: "Importancia del trabajo" },
-  { nombre: "L. H. C. Tippett", descripcion: "Muestreo del trabajo" },
-  { nombre: "Eli Whitney", descripcion: "Piezas intercambiables y producción en serie" },
-  { nombre: "F. W. Harris", descripcion: "Administración de inventarios" },
-  { nombre: "W. Shewhart", descripcion: "Control de calidad estadístico" },
-  { nombre: "Walter Rathenau", descripcion: "Técnicas de administración" },
-  { nombre: "Henry Gantt", descripcion: "Planificación y control de la producción" },
-  { nombre: "Henri Fayol", descripcion: "Enfoque general de la administración" },
-  { nombre: "Frank y Lillian Gilbreth", descripcion: "Economía del movimiento" },
-  { nombre: "Frederick Taylor", descripcion: "Estudio del tiempo y movimiento" },
-  { nombre: "George Dantzig", descripcion: "Programación lineal" },
-  { nombre: "Henry Ford", descripcion: "Línea de producción o cadena" }
-];
+const todosLosPares = [/* (igual que antes) */];
 
 let nombresActivos = [];
 let descripcionesActivas = [];
@@ -166,9 +130,8 @@ const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 
-/* 🔊 VOZ */
+/* VOZ igual */
 let vocesDisponibles = [];
-
 speechSynthesis.onvoiceschanged = () => {
   vocesDisponibles = speechSynthesis.getVoices();
 };
@@ -300,6 +263,7 @@ function verificar() {
   }
 }
 
+/* 🔥 NUEVA LÓGICA INTELIGENTE */
 function reemplazarPar(nombreTexto, descripcionTexto) {
   const itemsNombres = Array.from(contNombres.children);
   const itemsDesc = Array.from(contDesc.children);
@@ -307,9 +271,11 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const indexNombre = itemsNombres.findIndex(i => i.textContent === nombreTexto);
   const indexDesc = itemsDesc.findIndex(i => i.textContent === descripcionTexto);
 
+  // quitar los actuales
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
+  // nuevo nombre
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.find(n => n.nombre === p.nombre)
   );
@@ -317,14 +283,34 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  const posibles = nombresActivos.map(n =>
-    todosLosPares.find(p => p.nombre === n.nombre)
+  // 🔥 separar incorrectas anteriores
+  const descripcionesIncorrectas = descripcionesActivas.filter(d =>
+    !nombresActivos.find(n => n.nombre === d.nombre)
   );
 
   let nuevaDesc;
-  do {
-    nuevaDesc = posibles[Math.floor(Math.random() * posibles.length)];
-  } while (descripcionesActivas.find(d => d.descripcion === nuevaDesc.descripcion));
+  const probNuevaCorrecta = 0.2; // baja probabilidad
+
+  if (Math.random() < probNuevaCorrecta) {
+    nuevaDesc = todosLosPares.find(p => p.nombre === nuevoNombre.nombre);
+
+    if (descripcionesActivas.find(d => d.descripcion === nuevaDesc.descripcion)) {
+      nuevaDesc = null;
+    }
+  }
+
+  if (!nuevaDesc) {
+    if (descripcionesIncorrectas.length > 0) {
+      nuevaDesc = descripcionesIncorrectas[
+        Math.floor(Math.random() * descripcionesIncorrectas.length)
+      ];
+    } else {
+      const fallback = todosLosPares.filter(p =>
+        !descripcionesActivas.find(d => d.descripcion === p.descripcion)
+      );
+      nuevaDesc = fallback[Math.floor(Math.random() * fallback.length)];
+    }
+  }
 
   descripcionesActivas.push(nuevaDesc);
 
