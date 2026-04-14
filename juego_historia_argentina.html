@@ -410,17 +410,23 @@ function crearItemDesc(par) {
 function manejarSeleccion(item) {
   mensaje.textContent = "";
 
+  // 🔊 NUEVO: leer subtítulo en vez del año
+  if (item.dataset.tipo === "anio") {
+    const titulo = item.querySelector(".titulo-periodo").textContent;
+    hablar(titulo);
+  } else {
+    hablar(item.textContent);
+  }
+
   if (!seleccion1) {
     seleccion1 = item;
     item.classList.add("selected");
-    hablar(item.dataset.tipo === "anio" ? item.dataset.valor : item.textContent);
     return;
   }
 
   if (!seleccion2 && item !== seleccion1) {
     seleccion2 = item;
     item.classList.add("selected");
-    hablar(item.dataset.tipo === "anio" ? item.dataset.valor : item.textContent);
     verificar();
   }
 }
