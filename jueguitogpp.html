@@ -24,7 +24,6 @@ h1 {
   color: #333;
 }
 
-/* contenedor */
 .container {
   display: flex;
   justify-content: center;
@@ -33,7 +32,6 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* columnas */
 .column {
   display: flex;
   flex-direction: column;
@@ -47,7 +45,6 @@ h1 {
   width: 100%;
 }
 
-/* tarjetas */
 .item {
   padding: 12px;
   border-radius: 12px;
@@ -55,43 +52,39 @@ h1 {
   cursor: pointer;
   transition: all 0.25s ease;
   border: 1px solid #ddd;
-  opacity: 1;
 }
 
-/* hover */
-.item:hover {
+/* 🔥 FIX: hover solo si NO es correcto/incorrecto */
+.item:hover:not(.correct):not(.wrong) {
   transform: translateY(-2px);
   background: #f0f8ff;
 }
 
-/* seleccionado */
 .selected {
   background: #dbeafe;
   border-color: #3b82f6;
 }
 
-/* correcto */
 .correct {
   background: #22c55e;
   color: white;
   border: none;
+  pointer-events: none; /* opcional: bloquea interacción */
 }
 
-/* incorrecto */
 .wrong {
   background: #ef4444;
   color: white;
   border: none;
+  pointer-events: none; /* opcional */
 }
 
-/* fade out */
 .fade-out {
   opacity: 0;
   transform: scale(0.95);
   transition: all 0.5s;
 }
 
-/* fade in */
 .fade-in {
   opacity: 0;
   transform: scale(0.95);
@@ -173,7 +166,7 @@ const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 
-/* 🔊 VOZ MEJORADA */
+/* 🔊 VOZ */
 let vocesDisponibles = [];
 
 speechSynthesis.onvoiceschanged = () => {
@@ -182,16 +175,11 @@ speechSynthesis.onvoiceschanged = () => {
 
 function hablar(texto) {
   speechSynthesis.cancel();
-
   const msg = new SpeechSynthesisUtterance(texto);
 
   let voz = vocesDisponibles.find(v => 
     v.lang.includes("es") && v.name.toLowerCase().includes("google")
-  );
-
-  if (!voz) {
-    voz = vocesDisponibles.find(v => v.lang.includes("es"));
-  }
+  ) || vocesDisponibles.find(v => v.lang.includes("es"));
 
   if (voz) msg.voice = voz;
 
