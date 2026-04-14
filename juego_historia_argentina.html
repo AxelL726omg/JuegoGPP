@@ -2,20 +2,20 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Historia Industrial Argentina</title>
+<title>Juego Historia Industrial Argentina</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --bg: #0f0e0c;
-  --surface: #1c1a16;
-  --border: #312e26;
-  --accent: #e8a94a;
-  --accent2: #c46f3a;
-  --green: #6fcf97;
-  --red: #eb5757;
-  --text: #f0ead8;
-  --muted: #7a7060;
+  --bg: #0f0f13;
+  --surface: #1a1a22;
+  --border: #2e2e3d;
+  --accent: #7c6af7;
+  --accent2: #f7a06a;
+  --green: #3ecf8e;
+  --red: #f76a6a;
+  --text: #e8e8f0;
+  --muted: #888899;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,30 +28,28 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 16px 48px;
-  background-image:
-    radial-gradient(ellipse at 10% 5%, rgba(232,169,74,0.10) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 90%, rgba(196,111,58,0.08) 0%, transparent 50%);
+  padding: 24px 16px 40px;
+  background-image: radial-gradient(ellipse at 20% 10%, rgba(124,106,247,0.12) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, rgba(247,160,106,0.08) 0%, transparent 50%);
 }
 
 h1 {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  font-size: clamp(1.4rem, 4vw, 2rem);
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #f5dfa0 20%, var(--accent2));
+  background: linear-gradient(135deg, #fff 40%, var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   text-align: center;
 }
 
 .subtitle {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: var(--muted);
   margin-bottom: 20px;
   text-align: center;
-  letter-spacing: 0.04em;
 }
 
 #puntos-wrap {
@@ -67,7 +65,7 @@ h1 {
 
 #puntos-wrap span {
   font-family: 'Syne', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -81,7 +79,7 @@ h1 {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.6); }
+  50% { opacity: 0.5; transform: scale(0.7); }
 }
 
 .container {
@@ -98,14 +96,14 @@ h1 {
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  min-width: 220px;
-  max-width: 380px;
+  min-width: 240px;
+  max-width: 400px;
 }
 
 .col-label {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 4px;
@@ -113,48 +111,62 @@ h1 {
 }
 
 .item {
-  padding: 13px 16px;
+  padding: 14px 16px;
   border-radius: 12px;
   background: var(--surface);
   cursor: pointer;
   border: 1px solid var(--border);
-  font-size: 0.85rem;
-  line-height: 1.45;
+  font-size: 0.88rem;
+  line-height: 1.4;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.item.year-chip {
+/* Año/intervalo: estilo especial con acento de color */
+.item.anio {
   font-family: 'Syne', sans-serif;
-  font-size: 1rem;
   font-weight: 700;
+  font-size: 1rem;
   letter-spacing: -0.02em;
   text-align: center;
-  color: var(--accent);
+}
+
+.item.anio .titulo-periodo {
+  font-size: 0.72rem;
+  font-weight: 400;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--muted);
+  margin-top: 3px;
+  letter-spacing: 0;
+  line-height: 1.3;
 }
 
 .item:hover:not(.correct):not(.wrong) {
   transform: translateY(-2px);
   border-color: var(--accent);
-  box-shadow: 0 4px 20px rgba(232,169,74,0.18);
+  box-shadow: 0 4px 20px rgba(124,106,247,0.2);
 }
 
 .item.selected {
   border-color: var(--accent);
-  background: rgba(232,169,74,0.12);
-  box-shadow: 0 0 0 3px rgba(232,169,74,0.18);
+  background: rgba(124,106,247,0.15);
+  box-shadow: 0 0 0 3px rgba(124,106,247,0.2);
 }
 
 .item.correct {
-  background: rgba(111,207,151,0.12);
+  background: rgba(62,207,142,0.15);
   border-color: var(--green);
   color: var(--green);
   pointer-events: none;
 }
 
-.item.correct.year-chip { color: var(--green); }
+.item.correct .titulo-periodo {
+  color: rgba(62,207,142,0.7);
+}
 
 .item.wrong {
-  background: rgba(235,87,87,0.12);
+  background: rgba(247,106,106,0.15);
   border-color: var(--red);
   color: var(--red);
   pointer-events: none;
@@ -168,36 +180,48 @@ h1 {
 
 @keyframes aparecer {
   from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.fade-in { animation: aparecer 0.35s ease forwards; }
+.fade-in {
+  animation: aparecer 0.35s ease forwards;
+}
 
 #mensaje {
   margin-top: 18px;
   font-size: 0.82rem;
   color: var(--red);
   height: 18px;
+  transition: opacity 0.3s;
 }
 
 #delta {
   position: fixed;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   font-family: 'Syne', sans-serif;
   font-size: 2rem;
   font-weight: 800;
   pointer-events: none;
   opacity: 0;
+  transition: none;
+}
+
+#delta.show-green {
+  color: var(--green);
+  animation: floatUp 0.9s ease forwards;
+}
+
+#delta.show-red {
+  color: var(--red);
+  animation: floatUp 0.9s ease forwards;
 }
 
 @keyframes floatUp {
-  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -130%) scale(1.3); }
 }
-
-.show-green { color: var(--green); animation: floatUp 0.9s ease forwards; }
-.show-red   { color: var(--red);   animation: floatUp 0.9s ease forwards; }
 
 @media (max-width: 560px) {
   .container { flex-direction: column; align-items: center; }
@@ -218,11 +242,11 @@ h1 {
 
 <div class="container">
   <div class="column">
-    <div class="col-label">Período / Año</div>
-    <div id="años"></div>
+    <div class="col-label">Período</div>
+    <div id="anios"></div>
   </div>
   <div class="column">
-    <div class="col-label">Característica principal</div>
+    <div class="col-label">Característica del período</div>
     <div id="descripciones"></div>
   </div>
 </div>
@@ -233,104 +257,101 @@ h1 {
 <script>
 const todosLosPares = [
   {
-    año: "1880",
+    anio: "1880",
     titulo: "Modelo Agroexportador",
-    descripcion: "Argentina exporta carne y cereales; llegan inmigrantes europeos y el capital británico domina la economía."
+    descripcion: "Argentina se integra al mercado mundial exportando carne y cereales, con gran influencia del capital británico."
   },
   {
-    año: "1914–1930",
+    anio: "1914–1930",
     titulo: "Crisis del Modelo Agroexportador",
-    descripcion: "La Primera Guerra Mundial frena las importaciones y surgen las primeras industrias textiles y metalúrgicas locales."
+    descripcion: "Impacto de la Primera Guerra Mundial; aparecen industrias textiles, alimenticias y metalúrgicas locales."
   },
   {
-    año: "1930",
+    anio: "1930",
     titulo: "Inicio de la ISI",
-    descripcion: "Golpe de Estado y crisis mundial impulsan a Argentina a producir lo que antes importaba, con mayor intervención estatal."
+    descripcion: "Golpe de Estado y crisis mundial; Argentina comienza a producir lo que antes importaba con mayor intervención del Estado."
   },
   {
-    año: "1946–1955",
+    anio: "1946–1955",
     titulo: "Industrialización y Estado fuerte",
-    descripcion: "Gobierno de Perón: empresas estatales, siderurgia, automotriz y fomento del mercado interno y los derechos laborales."
+    descripcion: "Gobierno de Perón: fomento de siderurgia, automotriz y energía; creación de empresas estatales y derechos laborales."
   },
   {
-    año: "1955–1976",
-    titulo: "Capital extranjero e industria pesada",
-    descripcion: "Arriban multinacionales automotrices; la industria pesada crece en Córdoba y Buenos Aires."
+    anio: "1955–1976",
+    titulo: "Capital extranjero",
+    descripcion: "Llegada de empresas multinacionales, especialmente automotrices; desarrollo de polos industriales en Córdoba y Buenos Aires."
   },
   {
-    año: "1976–1983",
-    titulo: "Dictadura y apertura económica",
-    descripcion: "La dictadura militar abre las importaciones, reduce el rol del Estado y provoca una desindustrialización acelerada."
+    anio: "1976–1983",
+    titulo: "Dictadura y apertura",
+    descripcion: "Golpe militar, apertura a importaciones, reducción del rol del Estado y desindustrialización acelerada."
   },
   {
-    año: "1990–2001",
+    anio: "1990–2001",
     titulo: "Reformas neoliberales",
-    descripcion: "Menem privatiza empresas públicas, establece la convertibilidad peso-dólar y abre el comercio, cerrando industrias locales."
+    descripcion: "Gobierno de Menem: privatización de empresas públicas, convertibilidad peso-dólar y cierre de industrias nacionales."
   },
   {
-    año: "2001",
+    anio: "2001",
     titulo: "Crisis económica",
-    descripcion: "Colapso financiero y político: cae el empleo, la producción y el sistema bancario; fin de la convertibilidad."
+    descripcion: "Grave crisis política y económica: colapso del sistema financiero, caída del empleo y fin de la convertibilidad."
   },
   {
-    año: "2003–2015",
+    anio: "2003–2015",
     titulo: "Recuperación industrial",
-    descripcion: "Políticas de impulso a la industria nacional; crecen el empleo, el consumo y sectores como automotriz y alimentos."
+    descripcion: "Políticas de impulso a la industria nacional; crecimiento del empleo industrial y del consumo interno."
   },
   {
-    año: "2016–Hoy",
+    anio: "2016–Hoy",
     titulo: "Actualidad",
-    descripcion: "Argentina diversifica su producción: agroindustria, energía, economía del conocimiento y litio ganan protagonismo."
+    descripcion: "Argentina diversifica su producción: agroindustria, energía, economía del conocimiento y litio."
   }
 ];
 
-let añosActivos = [];
+let aniosActivos = [];
 let descripcionesActivas = [];
 let seleccion1 = null;
 let seleccion2 = null;
 let puntos = 0;
 let tiempoInicio = Date.now();
 
-const contAños = document.getElementById("años");
+const contAnios = document.getElementById("anios");
 const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 const delta = document.getElementById("delta");
 
-/* VOZ */
 let vocesDisponibles = [];
 speechSynthesis.onvoiceschanged = () => { vocesDisponibles = speechSynthesis.getVoices(); };
 
 function hablar(texto) {
   speechSynthesis.cancel();
   const msg = new SpeechSynthesisUtterance(texto);
-  const voz = vocesDisponibles.find(v => v.lang.includes("es") && v.name.toLowerCase().includes("google"))
-            || vocesDisponibles.find(v => v.lang.includes("es"));
+  let voz = vocesDisponibles.find(v => v.lang.includes("es") && v.name.toLowerCase().includes("google"))
+    || vocesDisponibles.find(v => v.lang.includes("es"));
   if (voz) msg.voice = voz;
   speechSynthesis.speak(msg);
 }
 
 function actualizarPuntos() { puntosUI.textContent = "Puntos: " + puntos; }
+
 function mezclar(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
 function mostrarDelta(texto, esPositivo) {
   delta.textContent = texto;
-  delta.className = "";
+  delta.className = esPositivo ? "show-green" : "show-red";
   void delta.offsetWidth;
   delta.className = esPositivo ? "show-green" : "show-red";
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
 function iniciarJuego() {
   const seleccion = mezclar(todosLosPares).slice(0, 5);
-  añosActivos = [...seleccion];
+  aniosActivos = [...seleccion];
 
   const correctos = seleccion.slice(0, 2);
   descripcionesActivas = [...correctos];
 
-  let intentos = 0;
-  while (descripcionesActivas.length < 5 && intentos < 200) {
-    intentos++;
+  while (descripcionesActivas.length < 5) {
     const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
     if (!descripcionesActivas.some(d => d.descripcion === random.descripcion)) {
       descripcionesActivas.push(random);
@@ -340,15 +361,14 @@ function iniciarJuego() {
   render();
 }
 
-// ─── RENDER ──────────────────────────────────────────────────────────────────
 function render() {
-  contAños.innerHTML = "";
+  contAnios.innerHTML = "";
   contDesc.innerHTML = "";
 
-  añosActivos.forEach(p => {
-    const el = crearItemAño(p);
+  aniosActivos.forEach(p => {
+    const el = crearItemAnio(p);
     el.classList.add("fade-in");
-    contAños.appendChild(el);
+    contAnios.appendChild(el);
   });
 
   mezclar(descripcionesActivas).forEach(p => {
@@ -358,13 +378,21 @@ function render() {
   });
 }
 
-function crearItemAño(par) {
+function crearItemAnio(par) {
   const div = document.createElement("div");
-  div.classList.add("item", "year-chip");
-  div.dataset.tipo = "año";
-  div.dataset.valor = par.año;
+  div.classList.add("item", "anio");
+  div.dataset.tipo = "anio";
+  div.dataset.valor = par.anio;
 
-  div.innerHTML = `<div>${par.año}</div><div style="font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:400;color:var(--muted);margin-top:3px;">${par.titulo}</div>`;
+  const anioSpan = document.createElement("div");
+  anioSpan.textContent = par.anio;
+
+  const tituloSpan = document.createElement("div");
+  tituloSpan.classList.add("titulo-periodo");
+  tituloSpan.textContent = par.titulo;
+
+  div.appendChild(anioSpan);
+  div.appendChild(tituloSpan);
   div.addEventListener("click", () => manejarSeleccion(div));
   return div;
 }
@@ -379,21 +407,20 @@ function crearItemDesc(par) {
   return div;
 }
 
-// ─── SELECCIÓN ───────────────────────────────────────────────────────────────
 function manejarSeleccion(item) {
   mensaje.textContent = "";
 
   if (!seleccion1) {
     seleccion1 = item;
     item.classList.add("selected");
-    hablar(item.dataset.valor);
+    hablar(item.dataset.tipo === "anio" ? item.dataset.valor : item.textContent);
     return;
   }
 
   if (!seleccion2 && item !== seleccion1) {
     seleccion2 = item;
     item.classList.add("selected");
-    hablar(item.dataset.valor);
+    hablar(item.dataset.tipo === "anio" ? item.dataset.valor : item.textContent);
     verificar();
   }
 }
@@ -405,9 +432,9 @@ function verificar() {
     return;
   }
 
-  const año = seleccion1.dataset.tipo === "año" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
-  const desc = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
-  const correcto = todosLosPares.find(p => p.año === año && p.descripcion === desc);
+  const anio = seleccion1.dataset.tipo === "anio" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const descripcion = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const correcto = todosLosPares.find(p => p.anio === anio && p.descripcion === descripcion);
 
   if (correcto) {
     const tiempo = (Date.now() - tiempoInicio) / 1000;
@@ -428,7 +455,7 @@ function verificar() {
     }, 900);
 
     setTimeout(() => {
-      reemplazarPar(año, desc);
+      reemplazarPar(anio, descripcion);
       tiempoInicio = Date.now();
     }, 1800);
 
@@ -446,52 +473,41 @@ function verificar() {
   }
 }
 
-// ─── REEMPLAZO (sin duplicados) ───────────────────────────────────────────────
-function reemplazarPar(añoTexto, descTexto) {
-  const itemsAños = Array.from(contAños.children);
+function reemplazarPar(anioTexto, descripcionTexto) {
+  const itemsAnios = Array.from(contAnios.children);
   const itemsDesc = Array.from(contDesc.children);
 
-  const indexAño = itemsAños.findIndex(i => i.dataset.valor === añoTexto);
-  const indexDesc = itemsDesc.findIndex(i => i.dataset.valor === descTexto);
+  const indexAnio = itemsAnios.findIndex(i => i.dataset.valor === anioTexto);
+  const indexDesc = itemsDesc.findIndex(i => i.dataset.valor === descripcionTexto);
 
-  // Quitamos el par acertado de los activos
-  añosActivos = añosActivos.filter(p => p.año !== añoTexto);
-  descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descTexto);
+  aniosActivos = aniosActivos.filter(p => p.anio !== anioTexto);
+  descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
-  // Elegimos un año nuevo que no esté ya visible
   const disponibles = todosLosPares.filter(p =>
-    !añosActivos.some(n => n.año === p.año)
+    !aniosActivos.some(n => n.anio === p.anio)
   );
+  const nuevoAnio = disponibles[Math.floor(Math.random() * disponibles.length)];
+  aniosActivos.push(nuevoAnio);
 
-  if (disponibles.length === 0) {
-    resetSeleccion();
-    return;
-  }
-
-  const nuevoAño = disponibles[Math.floor(Math.random() * disponibles.length)];
-  añosActivos.push(nuevoAño);
-
-  // Determinamos cuáles años ya tienen su descripción visible
-  const añosConPar = añosActivos.filter(n =>
+  const aniosConPar = aniosActivos.filter(n =>
     descripcionesActivas.some(d => {
-      const par = todosLosPares.find(p => p.año === n.año);
+      const par = todosLosPares.find(p => p.anio === n.anio);
       return par && par.descripcion === d.descripcion;
     })
   );
-  const añosSinPar = añosActivos.filter(n =>
-    !añosConPar.some(c => c.año === n.año)
+  const aniosSinPar = aniosActivos.filter(n =>
+    !aniosConPar.some(c => c.anio === n.anio)
   );
-  const añosViejos = añosSinPar.filter(n => n.año !== nuevoAño.año);
+  const aniosViejos = aniosSinPar.filter(n => n.anio !== nuevoAnio.anio);
 
-  let elegido;
-  if (Math.random() < 0.8 && añosViejos.length > 0) {
-    elegido = añosViejos[Math.floor(Math.random() * añosViejos.length)];
+  let elegidoAnio;
+  if (Math.random() < 0.8 && aniosViejos.length > 0) {
+    elegidoAnio = aniosViejos[Math.floor(Math.random() * aniosViejos.length)];
   } else {
-    elegido = nuevoAño;
+    elegidoAnio = nuevoAnio;
   }
 
-  // ✅ Descripción sin duplicados
-  let nuevaDesc = todosLosPares.find(p => p.año === elegido.año);
+  let nuevaDesc = todosLosPares.find(p => p.anio === elegidoAnio.anio);
 
   if (descripcionesActivas.some(d => d.descripcion === nuevaDesc.descripcion)) {
     const alternativa = todosLosPares.find(p =>
@@ -502,14 +518,13 @@ function reemplazarPar(añoTexto, descTexto) {
 
   descripcionesActivas.push(nuevaDesc);
 
-  // Crear y reemplazar en el DOM
-  const nuevoAñoDiv = crearItemAño(nuevoAño);
+  const nuevoAnioDiv = crearItemAnio(nuevoAnio);
   const nuevaDescDiv = crearItemDesc(nuevaDesc);
 
-  nuevoAñoDiv.classList.add("fade-in");
+  nuevoAnioDiv.classList.add("fade-in");
   nuevaDescDiv.classList.add("fade-in");
 
-  contAños.replaceChild(nuevoAñoDiv, itemsAños[indexAño]);
+  contAnios.replaceChild(nuevoAnioDiv, itemsAnios[indexAnio]);
   contDesc.replaceChild(nuevaDescDiv, itemsDesc[indexDesc]);
 
   resetSeleccion();
