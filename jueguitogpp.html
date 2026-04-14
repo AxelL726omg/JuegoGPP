@@ -2,12 +2,23 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Juego Emparejar PRO FIX</title>
+<title>Juego Emparejar PRO</title>
 
 <style>
 body { font-family: Arial; text-align: center; background: #f5f5f5; }
-.container { display: flex; justify-content: center; gap: 50px; margin-top: 20px; }
-.column { display: flex; flex-direction: column; gap: 10px; }
+
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-top: 20px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 .item {
   padding: 10px;
@@ -20,6 +31,11 @@ body { font-family: Arial; text-align: center; background: #f5f5f5; }
 .selected { background: #ddd; }
 .correct { background: #4CAF50; color: white; }
 .wrong { background: #f44336; color: white; }
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.4s;
+}
 
 #mensaje { color: red; margin-top: 10px; }
 #puntos { font-size: 20px; margin-top: 10px; }
@@ -78,7 +94,6 @@ function mezclar(arr) {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-// 🧠 INICIO SEGURO
 function iniciarJuego() {
   const seleccion = mezclar(todosLosPares).slice(0, 5);
   nombresActivos = [...seleccion];
@@ -87,13 +102,10 @@ function iniciarJuego() {
 
   descripcionesActivas = [];
 
-  // meter correctas
   correctos.forEach(p => descripcionesActivas.push(p));
 
-  // rellenar sin duplicar
   while (descripcionesActivas.length < 5) {
     const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
-
     if (!descripcionesActivas.find(d => d.descripcion === random.descripcion)) {
       descripcionesActivas.push(random);
     }
@@ -159,9 +171,21 @@ function verificar() {
     puntos += Math.floor(100 + bonus);
     actualizarPuntos();
 
-    reemplazarPar(nombre, descripcion);
+    // 🟢 mostrar verde
+    seleccion1.classList.add("correct");
+    seleccion2.classList.add("correct");
 
-    tiempoInicio = Date.now();
+    // ✨ fade
+    setTimeout(() => {
+      seleccion1.classList.add("fade-out");
+      seleccion2.classList.add("fade-out");
+    }, 200);
+
+    // ⏳ reemplazo después de animación
+    setTimeout(() => {
+      reemplazarPar(nombre, descripcion);
+      tiempoInicio = Date.now();
+    }, 500);
 
   } else {
     puntos -= 50;
@@ -175,12 +199,9 @@ function verificar() {
 }
 
 function reemplazarPar(nombreTexto, descripcionTexto) {
-
-  // eliminar
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
-  // agregar nombre nuevo (sin repetir)
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.find(n => n.nombre === p.nombre)
   );
@@ -188,22 +209,16 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  // descripción basada en nombres activos (garantiza match)
   const posibles = nombresActivos.map(n =>
     todosLosPares.find(p => p.nombre === n.nombre)
   );
 
   let nuevaDesc;
-
   do {
     nuevaDesc = posibles[Math.floor(Math.random() * posibles.length)];
   } while (descripcionesActivas.find(d => d.descripcion === nuevaDesc.descripcion));
 
   descripcionesActivas.push(nuevaDesc);
-
-  // 🔒 SEGURIDAD: mantener 5 y 5
-  if (nombresActivos.length > 5) nombresActivos.pop();
-  if (descripcionesActivas.length > 5) descripcionesActivas.pop();
 
   render();
   resetSeleccion();
@@ -211,7 +226,7 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
 
 function resetSeleccion() {
   document.querySelectorAll(".item").forEach(i => {
-    i.classList.remove("selected", "wrong");
+    i.classList.remove("selected", "wrong", "correct", "fade-out");
   });
   seleccion1 = null;
   seleccion2 = null;
