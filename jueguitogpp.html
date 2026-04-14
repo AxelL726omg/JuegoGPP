@@ -3,101 +3,215 @@
 <head>
 <meta charset="UTF-8">
 <title>Juego Emparejar PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  text-align: center;
-  background: linear-gradient(135deg, #e3f2fd, #f5f5f5);
-  margin: 0;
+:root {
+  --bg: #0f0f13;
+  --surface: #1a1a22;
+  --border: #2e2e3d;
+  --accent: #7c6af7;
+  --accent2: #f7a06a;
+  --green: #3ecf8e;
+  --red: #f76a6a;
+  --text: #e8e8f0;
+  --muted: #888899;
 }
 
-h1 { margin-top: 20px; font-weight: 600; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-#puntos {
-  font-size: 22px;
-  margin: 10px;
-  font-weight: bold;
-  color: #333;
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 40px;
+  background-image: radial-gradient(ellipse at 20% 10%, rgba(124,106,247,0.12) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, rgba(247,160,106,0.08) 0%, transparent 50%);
+}
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 40%, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#puntos-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 22px;
+  margin-bottom: 24px;
+}
+
+#puntos-wrap span {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
 }
 
 .container {
   display: flex;
   justify-content: center;
-  gap: 30px;
-  margin: 20px;
+  gap: 20px;
+  width: 100%;
+  max-width: 820px;
   flex-wrap: wrap;
 }
 
 .column {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 15px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  min-width: 250px;
-  max-width: 320px;
-  width: 100%;
+  gap: 10px;
+  flex: 1;
+  min-width: 240px;
+  max-width: 380px;
+}
+
+.col-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+  padding-left: 4px;
 }
 
 .item {
-  padding: 12px;
+  padding: 14px 16px;
   border-radius: 12px;
-  background: #fafafa;
+  background: var(--surface);
   cursor: pointer;
-  transition: all 0.25s ease;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.18s;
 }
 
 .item:hover:not(.correct):not(.wrong) {
   transform: translateY(-2px);
-  background: #f0f8ff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(124,106,247,0.2);
 }
 
-.selected { background: #dbeafe; border-color: #3b82f6; }
+.item.selected {
+  border-color: var(--accent);
+  background: rgba(124,106,247,0.15);
+  box-shadow: 0 0 0 3px rgba(124,106,247,0.2);
+}
 
-.correct {
-  background: #22c55e;
-  color: white;
-  border: none;
+.item.correct {
+  background: rgba(62,207,142,0.15);
+  border-color: var(--green);
+  color: var(--green);
   pointer-events: none;
 }
 
-.wrong {
-  background: #ef4444;
-  color: white;
-  border: none;
+.item.wrong {
+  background: rgba(247,106,106,0.15);
+  border-color: var(--red);
+  color: var(--red);
   pointer-events: none;
 }
 
 .fade-out {
   opacity: 0;
-  transform: scale(0.95);
-  transition: all 0.5s;
-}
-
-.fade-in {
-  opacity: 0;
-  transform: scale(0.95);
-  animation: aparecer 0.4s forwards;
+  transform: scale(0.9) translateY(-8px);
+  transition: all 0.45s ease;
 }
 
 @keyframes aparecer {
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fade-in {
+  animation: aparecer 0.35s ease forwards;
 }
 
 #mensaje {
-  margin-top: 15px;
-  font-weight: bold;
-  color: #ef4444;
+  margin-top: 18px;
+  font-size: 0.82rem;
+  color: var(--red);
+  height: 18px;
+  transition: opacity 0.3s;
 }
 
-@media (max-width: 600px) {
+#delta {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  pointer-events: none;
+  opacity: 0;
+  transition: none;
+}
+
+#delta.show-green {
+  color: var(--green);
+  animation: floatUp 0.9s ease forwards;
+}
+
+#delta.show-red {
+  color: var(--red);
+  animation: floatUp 0.9s ease forwards;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -130%) scale(1.3); }
+}
+
+@media (max-width: 560px) {
   .container { flex-direction: column; align-items: center; }
-  .column { max-width: 90%; }
-  .item { font-size: 14px; }
+  .column { max-width: 100%; min-width: unset; width: 100%; }
 }
 </style>
 </head>
@@ -105,14 +219,26 @@ h1 { margin-top: 20px; font-weight: 600; }
 <body>
 
 <h1>Emparejar nombres y descripciones</h1>
-<div id="puntos">Puntos: 0</div>
+<p class="subtitle">Administración de Operaciones</p>
+
+<div id="puntos-wrap">
+  <div class="dot"></div>
+  <span id="puntos">Puntos: 0</span>
+</div>
 
 <div class="container">
-  <div class="column" id="nombres"></div>
-  <div class="column" id="descripciones"></div>
+  <div class="column">
+    <div class="col-label">Autor / Personaje</div>
+    <div id="nombres"></div>
+  </div>
+  <div class="column">
+    <div class="col-label">Aporte / Concepto</div>
+    <div id="descripciones"></div>
+  </div>
 </div>
 
 <div id="mensaje"></div>
+<div id="delta"></div>
 
 <script>
 const todosLosPares = [
@@ -145,46 +271,45 @@ const contNombres = document.getElementById("nombres");
 const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
+const delta = document.getElementById("delta");
 
 /* VOZ */
 let vocesDisponibles = [];
-speechSynthesis.onvoiceschanged = () => {
-  vocesDisponibles = speechSynthesis.getVoices();
-};
+speechSynthesis.onvoiceschanged = () => { vocesDisponibles = speechSynthesis.getVoices(); };
 
 function hablar(texto) {
   speechSynthesis.cancel();
   const msg = new SpeechSynthesisUtterance(texto);
-
-  let voz = vocesDisponibles.find(v => 
-    v.lang.includes("es") && v.name.toLowerCase().includes("google")
-  ) || vocesDisponibles.find(v => v.lang.includes("es"));
-
+  let voz = vocesDisponibles.find(v => v.lang.includes("es") && v.name.toLowerCase().includes("google"))
+    || vocesDisponibles.find(v => v.lang.includes("es"));
   if (voz) msg.voice = voz;
-
   speechSynthesis.speak(msg);
 }
 
-function actualizarPuntos() {
-  puntosUI.textContent = "Puntos: " + puntos;
+function actualizarPuntos() { puntosUI.textContent = "Puntos: " + puntos; }
+
+function mezclar(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function mostrarDelta(texto, esPositivo) {
+  delta.textContent = texto;
+  delta.className = esPositivo ? "show-green" : "show-red";
+  void delta.offsetWidth; // reflow para reiniciar animación
+  delta.className = esPositivo ? "show-green" : "show-red";
 }
 
-function mezclar(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
-
+// ─── INIT ────────────────────────────────────────────────────────────────────
 function iniciarJuego() {
   const seleccion = mezclar(todosLosPares).slice(0, 5);
   nombresActivos = [...seleccion];
 
+  // Al inicio garantizamos al menos 2 pares correctos visibles
   const correctos = seleccion.slice(0, 2);
-  descripcionesActivas = [];
-
-  correctos.forEach(p => descripcionesActivas.push(p));
+  descripcionesActivas = [...correctos];
 
   while (descripcionesActivas.length < 5) {
     const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
-    if (!descripcionesActivas.find(d => d.descripcion === random.descripcion)) {
+    // ✅ FIX: verificar que descripción no esté duplicada
+    if (!descripcionesActivas.some(d => d.descripcion === random.descripcion)) {
       descripcionesActivas.push(random);
     }
   }
@@ -192,6 +317,7 @@ function iniciarJuego() {
   render();
 }
 
+// ─── RENDER ──────────────────────────────────────────────────────────────────
 function render() {
   contNombres.innerHTML = "";
   contDesc.innerHTML = "";
@@ -219,6 +345,7 @@ function crearItem(texto, tipo) {
   return div;
 }
 
+// ─── SELECCIÓN ───────────────────────────────────────────────────────────────
 function manejarSeleccion(item) {
   mensaje.textContent = "";
 
@@ -244,34 +371,40 @@ function verificar() {
     return;
   }
 
-  let nombre = seleccion1.dataset.tipo === "nombre" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
-  let descripcion = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
-
+  const nombre = seleccion1.dataset.tipo === "nombre" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
+  const descripcion = seleccion1.dataset.tipo === "descripcion" ? seleccion1.dataset.valor : seleccion2.dataset.valor;
   const correcto = todosLosPares.find(p => p.nombre === nombre && p.descripcion === descripcion);
 
   if (correcto) {
     const tiempo = (Date.now() - tiempoInicio) / 1000;
     const bonus = Math.max(0, 200 - tiempo * 10);
-    puntos += Math.floor(100 + bonus);
+    const ganado = Math.floor(100 + bonus);
+    puntos += ganado;
     actualizarPuntos();
+    mostrarDelta("+" + ganado, true);
 
+    seleccion1.classList.remove("selected");
+    seleccion2.classList.remove("selected");
     seleccion1.classList.add("correct");
     seleccion2.classList.add("correct");
 
     setTimeout(() => {
       seleccion1.classList.add("fade-out");
       seleccion2.classList.add("fade-out");
-    }, 1000);
+    }, 900);
 
     setTimeout(() => {
       reemplazarPar(nombre, descripcion);
       tiempoInicio = Date.now();
-    }, 2000);
+    }, 1800);
 
   } else {
     puntos -= 50;
     actualizarPuntos();
+    mostrarDelta("-50", false);
 
+    seleccion1.classList.remove("selected");
+    seleccion2.classList.remove("selected");
     seleccion1.classList.add("wrong");
     seleccion2.classList.add("wrong");
 
@@ -279,7 +412,7 @@ function verificar() {
   }
 }
 
-/* 🔥 LÓGICA FINAL INTELIGENTE */
+// ─── REEMPLAZO (con fix duplicados) ──────────────────────────────────────────
 function reemplazarPar(nombreTexto, descripcionTexto) {
   const itemsNombres = Array.from(contNombres.children);
   const itemsDesc = Array.from(contDesc.children);
@@ -287,27 +420,28 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const indexNombre = itemsNombres.findIndex(i => i.textContent === nombreTexto);
   const indexDesc = itemsDesc.findIndex(i => i.textContent === descripcionTexto);
 
+  // Quitamos el par acertado de los activos
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
+  // Elegimos un nombre nuevo (que no esté ya visible)
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.some(n => n.nombre === p.nombre)
   );
-
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
+  // Decidimos qué descripción agregar (con 80% de prob. la del nuevo nombre,
+  // o la de uno que ya estaba sin par)
   const nombresConPar = nombresActivos.filter(n =>
     descripcionesActivas.some(d => {
       const par = todosLosPares.find(p => p.nombre === n.nombre);
       return par && par.descripcion === d.descripcion;
     })
   );
-
   const nombresSinPar = nombresActivos.filter(n =>
     !nombresConPar.some(c => c.nombre === n.nombre)
   );
-
   const nombresViejos = nombresSinPar.filter(n => n.nombre !== nuevoNombre.nombre);
 
   let elegidoNombre;
@@ -317,10 +451,23 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
     elegidoNombre = nuevoNombre;
   }
 
-  const nuevaDesc = todosLosPares.find(p => p.nombre === elegidoNombre.nombre);
+  // ✅ FIX PRINCIPAL: la descripción elegida NO debe estar ya en descripcionesActivas
+  let nuevaDesc = todosLosPares.find(p => p.nombre === elegidoNombre.nombre);
+
+  if (descripcionesActivas.some(d => d.descripcion === nuevaDesc.descripcion)) {
+    // Buscar descripción alternativa que no esté activa
+    const alternativa = todosLosPares.find(p =>
+      !descripcionesActivas.some(d => d.descripcion === p.descripcion)
+    );
+    if (alternativa) {
+      nuevaDesc = alternativa;
+    }
+    // Si no hay alternativa (caso casi imposible con 16 pares y 5 activos), usamos la original
+  }
 
   descripcionesActivas.push(nuevaDesc);
 
+  // Crear y reemplazar elementos en el DOM
   const nuevoNombreDiv = crearItem(nuevoNombre.nombre, "nombre");
   const nuevaDescDiv = crearItem(nuevaDesc.descripcion, "descripcion");
 
