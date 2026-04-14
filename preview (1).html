@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Juego de Emparejar PRO</title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: #f5f5f5;
+}
+
+h1 { margin-top: 15px; }
+
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-top: 20px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  padding: 10px;
+  border: 2px solid #333;
+  background: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.selected { background: #ddd; }
+.correct { background: #4CAF50; color: white; }
+.wrong { background: #f44336; color: white; }
+.hidden { opacity: 0; transition: opacity 0.3s; }
+
+#mensaje { margin-top: 10px; color: red; }
+#puntos { font-size: 20px; margin-top: 10px; }
+</style>
+</head>
+
+<body>
+
+<h1>Emparejar nombres y descripciones</h1>
+<div id="puntos">Puntos: 0</div>
+
+<div class="container">
+  <div class="column" id="nombres"></div>
+  <div class="column" id="descripciones"></div>
+</div>
+
+<div id="mensaje"></div>
+
+<script>
+const todosLosPares = [
+  { nombre: "Platón", descripcion: "Primera mención de la división del trabajo" },
+  { nombre: "Adam Smith", descripcion: "División del trabajo" },
+  { nombre: "Charles Babbage", descripcion: "Organización y economía de la producción" },
+  { nombre: "William Crozier", descripcion: "Enfoque de planificación" },
+  { nombre: "Elton Mayo y Hawthorne", descripcion: "Importancia del trabajo" },
+  { nombre: "L. H. C. Tippett", descripcion: "Muestreo del trabajo" },
+  { nombre: "Eli Whitney", descripcion: "Piezas intercambiables y producción en serie" },
+  { nombre: "F. W. Harris", descripcion: "Administración de inventarios" },
+  { nombre: "W. Shewhart", descripcion: "Control de calidad estadístico" },
+  { nombre: "Walter Rathenau", descripcion: "Técnicas de administración" },
+  { nombre: "Henry Gantt", descripcion: "Planificación y control de la producción" },
+  { nombre: "Henri Fayol", descripcion: "Enfoque general de la administración" },
+  { nombre: "Frank y Lillian Gilbreth", descripcion: "Economía del movimiento" },
+  { nombre: "Frederick Taylor", descripcion: "Estudio del tiempo y movimiento" },
+  { nombre: "George Dantzig", descripcion: "Programación lineal" },
+  { nombre: "Henry Ford", descripcion: "Línea de producción o cadena" }
+];
+
+let nombresActivos = [];
+let descripcionesActivas = [];
+let seleccion1 = null;
+let seleccion2 = null;
+let puntos = 0;
+let tiempoInicio = Date.now();
+
+const contNombres = document.getElementById("nombres");
+const contDesc = document.getElementById("descripciones");
+const mensaje = document.getElementById("mensaje");
+const puntosUI = document.getElementById("puntos");
+
+function actualizarPuntos() {
+  puntosUI.textContent = "Puntos: " + puntos;
+}
+
+function iniciarJuego() {
+  const copia = [...todosLosPares].sort(() => Math.random() - 0.5);
+  nombresActivos = copia.slice(0, 5);
+
+  const correctos = nombresActivos.slice(0, 2);
+  descripcionesActivas = [];
+
+  correctos.forEach(p => descripcionesActivas.push(p));
+
+  while (descripcionesActivas.length < 5) {
+    const random = todosLosPares[Math.floor(Math.random() * todosLosPares.length)];
+    descripcionesActivas.push(random);
+  }
+
+  render();
+}
+
+function render() {
+  contNombres.innerHTML = "";
+  contDesc.innerHTML = "";
+
+  nombresActivos.forEach(p => {
+    contNombres.appendChild(crearItem(p.nombre, "nombre"));
+  });
+
+  descripcionesActivas
+    .sort(() => Math.random() - 0.5)
+    .forEach(p => {
+      contDesc.appendChild(crearItem(p.descripcion, "descripcion"));
+    });
+}
+
+function crearItem(texto, tipo) {
+  const div = document.createElement("div");
+  div.textContent = texto;
+  div.classList.add("item");
+  div.dataset.tipo = tipo;
+  div.dataset.valor = texto;
+  div.addEventListener("click", () => manejarSeleccion(div));
+  return div;
+}
+
+function manejarSeleccion(item) {
+  mensaje.textContent = "";
+
+  if (!seleccion1) {
+    seleccion1 = item;
+    item.classList.add("selected");
+    return;
+  }
+
+  if (!seleccion2 && item !== seleccion1) {
+    seleccion2 = item;
+    item.classList.add("selected");
+    verificar();
+  }
+}
+
+function verificar() {
+  const tipo1 = seleccion1.dataset.tipo;
+  const tipo2 = seleccion2.dataset.tipo;
+
+  if (tipo1 === tipo2) {
+    mensaje.textContent = "Elegí un nombre con una descripción";
+    resetSeleccion();
+    return;
+  }
+
+  let nombre, descripcion;
+
+  if (tipo1 === "nombre") {
+    nombre = seleccion1.dataset.valor;
+    descripcion = seleccion2.dataset.valor;
+  } else {
+    nombre = seleccion2.dataset.valor;
+    descripcion = seleccion1.dataset.valor;
+  }
+
+  const correcto = todosLosPares.find(p => p.nombre === nombre && p.descripcion === descripcion);
+
+  if (correcto) {
+    const tiempo = (Date.now() - tiempoInicio) / 1000;
+    let bonus = Math.max(0, 200 - tiempo * 10);
+    puntos += Math.floor(100 + bonus);
+    actualizarPuntos();
+
+    seleccion1.classList.add("correct");
+    seleccion2.classList.add("correct");
+
+    setTimeout(() => {
+      reemplazarPar(nombre, descripcion);
+      resetSeleccion();
+      tiempoInicio = Date.now();
+    }, 300);
+
+  } else {
+    puntos -= 50;
+    actualizarPuntos();
+
+    seleccion1.classList.add("wrong");
+    seleccion2.classList.add("wrong");
+
+    setTimeout(() => resetSeleccion(), 700);
+  }
+}
+
+function reemplazarPar(nombreTexto, descripcionTexto) {
+  nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
+  descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
+
+  const disponibles = todosLosPares.filter(p =>
+    !nombresActivos.find(n => n.nombre === p.nombre)
+  );
+
+  const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
+  nombresActivos.push(nuevoNombre);
+
+  const posibles = nombresActivos;
+  const nuevaDesc = posibles[Math.floor(Math.random() * posibles.length)];
+
+  descripcionesActivas.push(nuevaDesc);
+
+  render();
+}
+
+function resetSeleccion() {
+  document.querySelectorAll(".item").forEach(i => {
+    i.classList.remove("selected", "wrong");
+  });
+  seleccion1 = null;
+  seleccion2 = null;
+}
+
+iniciarJuego();
+</script>
+
+</body>
+</html>
