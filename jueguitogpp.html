@@ -34,7 +34,7 @@ body { font-family: Arial; text-align: center; background: #f5f5f5; }
 
 .fade-out {
   opacity: 0;
-  transition: opacity 0.4s;
+  transition: opacity 0.5s;
 }
 
 #mensaje { color: red; margin-top: 10px; }
@@ -94,7 +94,6 @@ function mezclar(arr) {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-// INICIO
 function iniciarJuego() {
   const seleccion = mezclar(todosLosPares).slice(0, 5);
   nombresActivos = [...seleccion];
@@ -114,7 +113,6 @@ function iniciarJuego() {
   render();
 }
 
-// RENDER SOLO INICIAL
 function render() {
   contNombres.innerHTML = "";
   contDesc.innerHTML = "";
@@ -175,15 +173,17 @@ function verificar() {
     seleccion1.classList.add("correct");
     seleccion2.classList.add("correct");
 
+    // fade después de 1 segundo
     setTimeout(() => {
       seleccion1.classList.add("fade-out");
       seleccion2.classList.add("fade-out");
-    }, 200);
+    }, 1000);
 
+    // reemplazo después de 2 segundos
     setTimeout(() => {
       reemplazarPar(nombre, descripcion);
       tiempoInicio = Date.now();
-    }, 500);
+    }, 2000);
 
   } else {
     puntos -= 50;
@@ -196,7 +196,6 @@ function verificar() {
   }
 }
 
-// 🔥 REEMPLAZO SIN MOVER LOS DEMÁS
 function reemplazarPar(nombreTexto, descripcionTexto) {
 
   const itemsNombres = Array.from(contNombres.children);
@@ -205,11 +204,9 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const indexNombre = itemsNombres.findIndex(i => i.textContent === nombreTexto);
   const indexDesc = itemsDesc.findIndex(i => i.textContent === descripcionTexto);
 
-  // actualizar arrays
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
-  // nuevo nombre
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.find(n => n.nombre === p.nombre)
   );
@@ -217,7 +214,6 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  // nueva descripción (basada en visibles)
   const posibles = nombresActivos.map(n =>
     todosLosPares.find(p => p.nombre === n.nombre)
   );
@@ -229,7 +225,6 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
 
   descripcionesActivas.push(nuevaDesc);
 
-  // reemplazo puntual
   const nuevoNombreDiv = crearItem(nuevoNombre.nombre, "nombre");
   const nuevaDescDiv = crearItem(nuevaDesc.descripcion, "descripcion");
 
