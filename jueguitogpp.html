@@ -5,7 +5,6 @@
 <title>Juego Emparejar PRO</title>
 
 <style>
-/* (todo tu CSS igual, no se toca) */
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   text-align: center;
@@ -116,7 +115,24 @@ h1 { margin-top: 20px; font-weight: 600; }
 <div id="mensaje"></div>
 
 <script>
-const todosLosPares = [/* (igual que antes) */];
+const todosLosPares = [
+  { nombre: "Platón", descripcion: "Primera mención de la división del trabajo" },
+  { nombre: "Adam Smith", descripcion: "División del trabajo" },
+  { nombre: "Charles Babbage", descripcion: "Organización y economía de la producción" },
+  { nombre: "William Crozier", descripcion: "Enfoque de planificación" },
+  { nombre: "Elton Mayo y Hawthorne", descripcion: "Importancia del trabajo" },
+  { nombre: "L. H. C. Tippett", descripcion: "Muestreo del trabajo" },
+  { nombre: "Eli Whitney", descripcion: "Piezas intercambiables y producción en serie" },
+  { nombre: "F. W. Harris", descripcion: "Administración de inventarios" },
+  { nombre: "W. Shewhart", descripcion: "Control de calidad estadístico" },
+  { nombre: "Walter Rathenau", descripcion: "Técnicas de administración" },
+  { nombre: "Henry Gantt", descripcion: "Planificación y control de la producción" },
+  { nombre: "Henri Fayol", descripcion: "Enfoque general de la administración" },
+  { nombre: "Frank y Lillian Gilbreth", descripcion: "Economía del movimiento" },
+  { nombre: "Frederick Taylor", descripcion: "Estudio del tiempo y movimiento" },
+  { nombre: "George Dantzig", descripcion: "Programación lineal" },
+  { nombre: "Henry Ford", descripcion: "Línea de producción o cadena" }
+];
 
 let nombresActivos = [];
 let descripcionesActivas = [];
@@ -130,7 +146,7 @@ const contDesc = document.getElementById("descripciones");
 const mensaje = document.getElementById("mensaje");
 const puntosUI = document.getElementById("puntos");
 
-/* VOZ igual */
+/* VOZ */
 let vocesDisponibles = [];
 speechSynthesis.onvoiceschanged = () => {
   vocesDisponibles = speechSynthesis.getVoices();
@@ -263,7 +279,7 @@ function verificar() {
   }
 }
 
-/* 🔥 NUEVA LÓGICA INTELIGENTE */
+/* 🔥 ARREGLADO */
 function reemplazarPar(nombreTexto, descripcionTexto) {
   const itemsNombres = Array.from(contNombres.children);
   const itemsDesc = Array.from(contDesc.children);
@@ -271,11 +287,9 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const indexNombre = itemsNombres.findIndex(i => i.textContent === nombreTexto);
   const indexDesc = itemsDesc.findIndex(i => i.textContent === descripcionTexto);
 
-  // quitar los actuales
   nombresActivos = nombresActivos.filter(p => p.nombre !== nombreTexto);
   descripcionesActivas = descripcionesActivas.filter(p => p.descripcion !== descripcionTexto);
 
-  // nuevo nombre
   const disponibles = todosLosPares.filter(p =>
     !nombresActivos.find(n => n.nombre === p.nombre)
   );
@@ -283,13 +297,16 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
   const nuevoNombre = disponibles[Math.floor(Math.random() * disponibles.length)];
   nombresActivos.push(nuevoNombre);
 
-  // 🔥 separar incorrectas anteriores
-  const descripcionesIncorrectas = descripcionesActivas.filter(d =>
-    !nombresActivos.find(n => n.nombre === d.nombre)
-  );
+  // 🔥 detectar incorrectas correctamente
+  const descripcionesIncorrectas = descripcionesActivas.filter(d => {
+    return !nombresActivos.some(n => {
+      const par = todosLosPares.find(p => p.nombre === n.nombre);
+      return par && par.descripcion === d.descripcion;
+    });
+  });
 
   let nuevaDesc;
-  const probNuevaCorrecta = 0.2; // baja probabilidad
+  const probNuevaCorrecta = 0.2;
 
   if (Math.random() < probNuevaCorrecta) {
     nuevaDesc = todosLosPares.find(p => p.nombre === nuevoNombre.nombre);
@@ -310,6 +327,12 @@ function reemplazarPar(nombreTexto, descripcionTexto) {
       );
       nuevaDesc = fallback[Math.floor(Math.random() * fallback.length)];
     }
+  }
+
+  // 🛑 protección
+  if (!nuevaDesc) {
+    console.error("Error: nuevaDesc undefined");
+    return;
   }
 
   descripcionesActivas.push(nuevaDesc);
